@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIDiary - Pendamping Kesehatan Mental Bertenaga AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigasi -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="nav-brand">
+                <i class="fas fa-brain brand-icon"></i>
+                AIDiary
+            </a>
+            <button class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-links">
+                <a href="#hero">Beranda</a>
+                <a href="#">Temukan Vibe-mu</a>
+                <a href="#how-it-works">Panduan</a>
+                <a href="#faq">FAQ</a>
+                <a href="/mood-tracker">Mood Tracker</a>
+                <a href="/chat">Chat</a>
+                {% if logged_in %}
+                    <span class="user-greeting">👤 {{ current_username }}</span>
+                    <a href="/logout" class="logout-link">Keluar</a>
+                {% else %}
+                    <button class="login-button" id="login-button">Masuk</button>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Overlay Login -->
+<div class="login-overlay" id="login-overlay">
+    <div class="login-form-container">
+        <button class="login-close" id="login-close">&times;</button>
+        <div class="form-decoration decoration-1"></div>
+        <div class="form-decoration decoration-2"></div>
+        <h2>Selamat Datang Kembali</h2>
+        {% if error %}
+        <div class="login-error" style="color: #d32f2f; margin-bottom: 10px; text-align: center; font-weight: 500;">{{ error }}</div>
+        {% endif %}
+        <form id="login-form" method="POST">
+            <div class="login-input-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="Masukkan username Anda" required>
+            </div>
+            <div class="login-input-group">
+                <label for="password">Kata Sandi</label>
+                <input type="password" name="password" id="password" placeholder="Masukkan kata sandi Anda" required>
+            </div>
+            <div class="login-options">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Ingat saya</label>
+                </div>
+                <a href="#" class="forgot-password">Lupa Kata Sandi?</a>
+            </div>
+            <button type="submit" name="login" class="login-submit">Masuk</button>
+        </form>
+        <div class="register-prompt">
+            Belum punya akun? <a href="#" id="open-register">Daftar</a>
+        </div>
+        <div class="social-login">
+            <button class="social-btn google" aria-label="Masuk dengan Google"><i class="fab fa-google"></i></button>
+            <button class="social-btn facebook" aria-label="Masuk dengan Facebook"><i class="fab fa-facebook-f"></i></button>
+            <button class="social-btn twitter" aria-label="Masuk dengan Twitter"><i class="fab fa-twitter"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay Daftar -->
+<div class="register-overlay" id="register-overlay">
+    <div class="register-form-container">
+        <button class="register-close" id="register-close">&times;</button>
+        <div class="form-decoration decoration-1"></div>
+        <div class="form-decoration decoration-2"></div>
+        <h2>Buat Akun Baru</h2>
+        <form id="register-form" method="POST">
+            <div class="register-input-group">
+                <label for="reg-username">Username</label>
+                <input type="text" id="reg-username" name="username" placeholder="Masukkan username Anda" required>
+            </div>
+            <div class="register-input-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" name="email" placeholder="Masukkan email Anda" required>
+            </div>
+            <div class="register-input-group">
+                <label for="reg-password">Kata Sandi</label>
+                <input type="password" id="reg-password" name="password" placeholder="Buat kata sandi" required>
+            </div>
+            <button type="submit" name="register" class="register-submit">Daftar</button>
+        </form>
+        <div class="login-prompt">
+            Sudah punya akun? <a href="#" id="open-login">Masuk</a>
+        </div>
+        <div class="social-login">
+            <button class="social-btn google" aria-label="Daftar dengan Google"><i class="fab fa-google"></i></button>
+            <button class="social-btn facebook" aria-label="Daftar dengan Facebook"><i class="fab fa-facebook-f"></i></button>
+            <button class="social-btn twitter" aria-label="Daftar dengan Twitter"><i class="fab fa-twitter"></i></button>
+        </div>
+    </div>
+</div>
+
+    <!-- Bagian Hero -->
+    <div class="container" id="hero">
+        <div class="hero">
+            <div class="hero-text">
+                <h1>Selamat Datang di<br>AIDiary!</h1>
+                <p>Pendamping kesehatan mental pribadi Anda<br>bertenaga AI</p>
+                <button class="cta-button" id="try-button">Coba Sekarang!</button>
+            </div>
+            <div class="hero-image">
+                <div class="orbital"></div>
+                <div class="orbital"></div>
+                <div class="orbital"></div>
+                <img src="{{ url_for('static', filename='brain.png') }}" class="brain-img" style="position: relative; z-index: 2;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Bagian Fitur -->
+    <div class="container">
+        <div class="features-section">
+            <div class="features-container">
+                <div class="feature-tabs">
+                    <div class="feature-tab active" data-target="emotions-card">
+                        <span>Analisis Emosi</span>
+                        <div class="tab-underline"></div>
+                    </div>
+                    <div class="feature-tab" data-target="journal-card">
+                        <span>Chat dengan Jurnal</span>
+                        <div class="tab-underline"></div>
+                    </div>
+                </div>
+                <div class="feature-cards">
+                    <div class="feature-card active" id="emotions-card">
+                        <h3>Ungkapkan emosi di balik pikiran Anda</h3>
+                        <p>Analisis pola dalam tulisan Anda dan jelajahi pikiran yang terkait dengan emosi tersebut. Temukan wawasan berharga tentang bagaimana perasaan Anda berkembang dari hari ke hari. Dengan teknologi AI kami, Anda akan mendapatkan interpretasi emosional yang mendalam, saran reflektif, dan dukungan yang membantu memahami diri sendiri dengan lebih baik.</p>
+                    </div>
+                    <div class="feature-card" id="journal-card">
+                        <h3>Berbicara dengan jurnal Anda</h3>
+                        <p>Chatbot yang benar-benar mengenal Anda – ajukan pertanyaan, dapatkan wawasan, dan temukan ide untuk eksplorasi diri yang lebih dalam. Rasakan pengalaman menulis yang lebih bermakna dengan balasan reflektif, saran personal, dan dukungan emosional dari AI yang dirancang untuk mendampingi perjalanan mental Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bagian Refleksi -->
+    <div class="reflect-container">
+        <div class="reflect-text">
+            <div class="static-text">Renungkan</div>
+            <div class="dynamic-text-container">
+                <div class="dynamic-text visible">keputusan Anda</div>
+                <div class="dynamic-text">kenangan</div>
+                <div class="dynamic-text">tujuan hidup</div>
+                <div class="dynamic-text">emosi</div>
+                <div class="dynamic-text">impian Anda</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bagian Cara Kerja -->
+    <div class="container">
+        <div class="how-it-works" id="how-it-works">
+            <h2>Cara Kerjanya</h2>
+            <p>Kami memecah perjalanan emosional Anda menjadi langkah-langkah jelas dan bisa ditindaklanjuti untuk kesejahteraan mental yang lebih baik.</p>
+            <div class="steps">
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-feather-alt"></i></div>
+                    <div class="step-number">1</div>
+                    <h3>Lacak suasana hati Anda</h3>
+                    <p>Masukkan perasaan Anda melalui langkah cepat dan intuitif, baik dalam bentuk teks maupun emoji.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-brain"></i></div>
+                    <div class="step-number">2</div>
+                    <h3>Dapatkan umpan balik instan</h3>
+                    <p>AI kami menganalisis suasana hati Anda dan memberikan wawasan serta saran secara real-time berdasarkan tren emosional Anda.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-seedling"></i></div>
+                    <div class="step-number">3</div>
+                    <h3>Tingkatkan kesehatan mental Anda</h3>
+                    <p>Ikuti latihan mindfulness terpandu, modul CBT, dan alat untuk membangun ketahanan emosional.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bagian FAQ -->
+    <div class="container">
+        <div class="faq" id="faq">
+            <h2>Pertanyaan Umum tentang Konsultasi Kesehatan Mental</h2>
+            <div class="faq-item">
+                <div class="faq-question">Apa itu AI Diary?</div>
+                <div class="faq-answer">
+                    <p>AI Diary adalah mitra digital cerdas yang membantu Anda melacak pikiran, emosi, dan pengalaman harian melalui percakapan. Ia menawarkan dorongan lembut, wawasan emosional, dan pelacakan suasana hati untuk mendukung pertumbuhan pribadi dan kesejahteraan Anda.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Bagaimana AI Diary membantu saya merefleksikan emosi?</div>
+                <div class="faq-answer">
+                    <p>AI Diary menyediakan ruang yang aman dan bebas penilaian untuk mengekspresikan perasaan Anda. Ia menggunakan AI canggih untuk menganalisis pola dalam tulisan Anda, membantu mengidentifikasi pemicu emosional dan membangun mekanisme penanganan yang lebih sehat.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Apa saja jenis pertanyaan yang ditawarkan oleh AI Diary?</div>
+                <div class="faq-answer">
+                    <p>AI Diary menawarkan berbagai pertanyaan reflektif seperti pertanyaan tentang hari Anda, latihan syukur, teknik manajemen stres, pengingat mindfulness, dan pertanyaan yang dipersonalisasi berdasarkan entri sebelumnya untuk meningkatkan kesadaran diri.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Apakah saya bisa memantau suasana hati dari waktu ke waktu?</div>
+                <div class="faq-answer">
+                    <p>Ya! AI Diary memiliki fitur pelacakan suasana hati yang lengkap dan dapat memvisualisasikan pola emosional Anda dari hari ke hari, minggu ke minggu, dan bulan ke bulan. Ini membantu Anda mengenali pola, mengidentifikasi pemicu, dan merayakan kemajuan emosional Anda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Kami berkomitmen membangun solusi cerdas untuk menciptakan, menerapkan, dan menyebarkan pengetahuan demi dunia yang lebih pintar.</p>
+        </div>
+        <p class="copyright">
+            AiDiary | All Rights Reserved
+        </p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% if logged_in %}
+    <script>
+    window.addEventListener('DOMContentLoaded', function() {
+        var loginOverlay = document.getElementById('login-overlay');
+        if (loginOverlay) loginOverlay.style.display = 'none';
+        var loginBtn = document.getElementById('login-button');
+        if (loginBtn) loginBtn.style.display = 'none';
+    });
+    </script>
+    {% endif %}
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>

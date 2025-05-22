@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker Suasana Hati - AIDiary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .mood-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        .mood-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .mood-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .mood-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-gap: 20px;
+            align-items: end;
+        }
+        .form-group {
+            margin-bottom: 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .mood-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .mood-option {
+            cursor: pointer;
+            font-size: 24px;
+            transition: transform 0.2s;
+            padding: 5px;
+            border-radius: 50%;
+        }
+        .mood-option:hover {
+            transform: scale(1.2);
+        }
+        .mood-option.selected {
+            background-color: #e6f7ff;
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #6a8ef1, #926aef);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 142, 241, 0.4);
+        }
+        .mood-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .mood-tab {
+            background: #f2f2f2;
+            border: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .mood-tab.active {
+            background: linear-gradient(135deg, #6a8ef1, #926aef);
+            color: white;
+        }
+        .mood-chart {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .insights-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .insight-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .insight-card h4 {
+            margin-top: 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        .insight-card h4 i {
+            margin-right: 8px;
+            color: #6a8ef1;
+        }
+        .history-list {
+            margin-top: 30px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .history-date {
+            font-weight: 600;
+            width: 120px;
+        }
+        .history-mood {
+            display: flex;
+            align-items: center;
+            width: 80px;
+        }
+        .history-note {
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+        .history-actions button {
+            border: none;
+            background: none;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .history-actions button:hover {
+            color: #ff5252;
+        }
+        .navigation-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #6a8ef1;
+            text-decoration: none;
+        }
+        .navigation-link i {
+            margin-right: 5px;
+        }
+        @media (max-width: 768px) {
+            .mood-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <i class="fas fa-brain brand-icon"></i>
+                AIDiary
+            </a>
+            <div class="nav-links">
+                <a href="/chat">Chat</a>
+                <a href="/mood-tracker" class="active">Mood Tracker</a>
+                <button class="login-button" onclick="window.location.href='/logout'">Keluar</button>
+            </div>
+        </div>
+    </nav>
+    <div class="mood-container">
+        <div class="mood-header">
+            <h2>Tracker Suasana Hati</h2>
+            <p>Pantau dan lacak perubahan suasana hati Anda dari waktu ke waktu</p>
+        </div>
+        
+        <form id="mood-form" class="mood-form">
+            <div class="form-group">
+                <label for="date">Tanggal:</label>
+                <input type="date" id="date" name="date" value="{{ today_date }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Suasana Hati:</label>
+                <input type="hidden" id="mood" name="mood" value="3" required>
+                <div class="mood-selector">
+                    <span class="mood-option" data-value="1" onclick="selectMood(1)">😢</span>
+                    <span class="mood-option" data-value="2" onclick="selectMood(2)">😕</span>
+                    <span class="mood-option" data-value="3" onclick="selectMood(3)">😐</span>
+                    <span class="mood-option" data-value="4" onclick="selectMood(4)">🙂</span>
+                    <span class="mood-option" data-value="5" onclick="selectMood(5)">😁</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="note">Catatan:</label>
+                <textarea id="note" name="note" rows="2" placeholder="Bagaimana perasaanmu hari ini?"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="submit-btn">Simpan</button>
+            </div>
+        </form>
+        
+        <div class="mood-tabs">
+            <button class="mood-tab active" data-timeframe="week" onclick="changeTimeframe('week')">Minggu Ini</button>
+            <button class="mood-tab" data-timeframe="month" onclick="changeTimeframe('month')">Bulan Ini</button>
+            <button class="mood-tab" data-timeframe="year" onclick="changeTimeframe('year')">Tahun Ini</button>
+        </div>
+        
+        <div id="mood-chart" class="mood-chart"></div>
+        
+        <div id="insights" class="insights-container"></div>
+        
+        <h3>Riwayat Suasana Hati</h3>
+        <div id="history-list" class="history-list"></div>
+        
+        <a href="/chat" class="navigation-link"><i class="fas fa-arrow-left"></i> Kembali ke Chat</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Set default selected mood
+        let currentTimeframe = 'week';
+        window.onload = function() {
+            selectMood(3); // Neutral by default
+            loadMoodData(currentTimeframe);
+        };
+        
+        function selectMood(value) {
+            document.querySelectorAll('.mood-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`.mood-option[data-value="${value}"]`).classList.add('selected');
+            document.getElementById('mood').value = value;
+        }
+        
+        function changeTimeframe(timeframe) {
+            document.querySelectorAll('.mood-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.mood-tab[data-timeframe="${timeframe}"]`).classList.add('active');
+            currentTimeframe = timeframe;
+            loadMoodData(timeframe);
+        }
+        
+        async function loadMoodData(timeframe = 'week') {
+            try {
+                const res = await fetch(`/get_mood_data?timeframe=${timeframe}`);
+                const data = await res.json();
+                if (data.success) {
+                    renderChart(data.chart_data);
+                    renderHistory(data.history);
+                    renderInsights(data.insights);
+                } else {
+                    console.error("Failed to load mood data:", data.error);
+                }
+            } catch (error) {
+                console.error("Error loading mood data:", error);
+            }
+        }
+        
+        document.getElementById('mood-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            try {
+                const res = await fetch('/save_mood', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    // Reset form
+                    document.getElementById('note').value = '';
+                    selectMood(3);
+                    
+                    // Update data
+                    loadMoodData(currentTimeframe);
+                    alert('Suasana hati berhasil disimpan!');
+                } else {
+                    alert('Gagal menyimpan: ' + (data.error || 'Terjadi kesalahan'));
+                }
+            } catch (error) {
+                console.error("Error saving mood:", error);
+                alert('Terjadi kesalahan saat menyimpan data');
+            }
+        });
+        
+        function renderChart(chartData) {
+            const ctx = document.createElement('canvas');
+            document.getElementById('mood-chart').innerHTML = '';
+            document.getElementById('mood-chart').appendChild(ctx);
+            
+            if (!chartData || !chartData.labels || chartData.labels.length === 0) {
+                document.getElementById('mood-chart').innerHTML = '<p class="text-center">Belum ada data mood yang tersedia</p>';
+                return;
+            }
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Suasana Hati',
+                        data: chartData.values,
+                        backgroundColor: 'rgba(106, 142, 241, 0.2)',
+                        borderColor: 'rgba(106, 142, 241, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: chartData.colors,
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            min: 0.5,
+                            max: 5.5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const labels = ['', 'Sangat Sedih', 'Sedih', 'Netral', 'Senang', 'Sangat Senang'];
+                                    return labels[value] || '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    return chartData.notes[index] ? 'Catatan: ' + chartData.notes[index] : '';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderHistory(history) {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            
+            if (!history || history.length === 0) {
+                list.innerHTML = '<p class="text-center">Belum ada riwayat yang tersedia</p>';
+                return;
+            }
+            
+            // Sort by date descending
+            history.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                // Convert date format
+                const dateObj = new Date(item.date);
+                const formattedDate = dateObj.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                // Emoji based on mood
+                const moodEmojis = ['', '😢', '😕', '😐', '🙂', '😁'];
+                
+                historyItem.innerHTML = `
+                    <div class="history-date">${formattedDate}</div>
+                    <div class="history-mood">${moodEmojis[item.mood]} (${item.mood}/5)</div>
+                    <div class="history-note">${item.note || '<em>Tidak ada catatan</em>'}</div>
+                    <div class="history-actions">
+                        <button onclick="deleteMoodEntry(${item.id})" title="Hapus"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                
+                list.appendChild(historyItem);
+            });
+        }
+        
+        function renderInsights(insights) {
+            const container = document.getElementById('insights');
+            container.innerHTML = '';
+            
+            if (!insights) {
+                container.innerHTML = '<p>Tidak ada insight yang tersedia</p>';
+                return;
+            }
+            
+            const trendCard = document.createElement('div');
+            trendCard.className = 'insight-card';
+            trendCard.innerHTML = `
+                <h4><i class="fas fa-chart-line"></i> Tren Suasana Hati</h4>
+                <p>${insights.weekly_trend}</p>
+            `;
+            
+            const dayCard = document.createElement('div');
+            dayCard.className = 'insight-card';
+            dayCard.innerHTML = `
+                <h4><i class="fas fa-calendar-day"></i> Hari Terbaik</h4>
+                <p>${insights.best_day}</p>
+            `;
+            
+            const suggestionCard = document.createElement('div');
+            suggestionCard.className = 'insight-card';
+            suggestionCard.innerHTML = `
+                <h4><i class="fas fa-lightbulb"></i> Saran</h4>
+                <p>${insights.suggestion}</p>
+            `;
+            
+            container.appendChild(trendCard);
+            container.appendChild(dayCard);
+            container.appendChild(suggestionCard);
+        }
+        
+        async function deleteMoodEntry(moodId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus catatan mood ini?')) {
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('mood_id', moodId);
+                
+                const res = await fetch('/delete_mood', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    loadMoodData(currentTimeframe);
+                    alert('Catatan mood berhasil dihapus');
+                } else {
+                    alert('Gagal menghapus: ' + (data.error || 'Terjadi kesalahan'));
+                }
+            } catch (error) {
+                console.error("Error deleting mood entry:", error);
+                alert('Terjadi kesalahan saat menghapus catatan');
+            }
+        }
+    </script>
+</body>
+</html>

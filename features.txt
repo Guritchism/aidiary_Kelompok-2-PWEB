@@ -1,0 +1,30 @@
+AIDiary - Fitur Fungsional:
+
+1. Otentikasi Pengguna
+   - Registrasi pengguna baru
+   - Login dan logout dengan manajemen sesi
+
+2. Chatbot AI
+   - Membuat percakapan baru
+   - Mengirim pesan dan menerima tanggapan AI
+   - Menyimpan dan memuat riwayat percakapan dari MySQL
+
+3. Riwayat Chat
+   - Penyimpanan pesan dan respons user di database
+   - Load riwayat chat saat masuk kembali
+   - Penomoran dan pengelolaan beberapa percakapan
+
+4. Mood Tracker
+   - Menambah dan memperbarui entri mood harian (skala 1–5) dengan catatan
+   - Menghapus entri mood yang sudah tercatat
+   - Melihat data mood untuk periode minggu, bulan, dan tahun
+
+5. Analisis Mood
+   - Menyediakan data untuk grafik tren mood
+   - Menghasilkan insight (tren mingguan, hari terbaik)
+   - Rekomendasi berdasarkan rata-rata mood
+
+6. Endpoints REST dan Utilities
+   - API endpoint untuk mengirim pesan, membuat chat baru, menyimpan/mengambil mood
+   - Format pesan chat (heading, bold, italic, code)
+   - Handle error dasar pada operasi database

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIDiary - Pendamping Kesehatan Mental Bertenaga AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Style untuk Mood Prompt Dialog */
+        .mood-prompt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .mood-prompt-container {
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: scaleIn 0.3s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .mood-prompt-container h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .mood-prompt-container p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .mood-options {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .mood-option {
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 30px;
+            padding: 10px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .mood-option.selected {
+            background-color: #e6f7ff;
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .mood-option span {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .mood-note {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .mood-submit {
+            background: linear-gradient(135deg, #6a8ef1, #926aef);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .mood-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 142, 241, 0.4);
+        }
+        
+        .mood-later {
+            color: #6a8ef1;
+            margin-top: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body id="chat">
+    <!-- Tombol Toggle Sidebar -->
+    <button class="toggle-sidebar" id="toggle-sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mood Prompt Dialog -->
+    <div id="mood-prompt-overlay" class="mood-prompt-overlay" style="display: none;">
+        <div class="mood-prompt-container">
+            <h3>Bagaimana perasaanmu hari ini?</h3>
+            <p>Kami ingin tahu suasana hatimu untuk membantu melacak kesehatan mentalmu.</p>
+              <div class="mood-options">
+                <div class="mood-option" data-value="1">
+                    😢 <span>Sangat Sedih</span>
+                </div>
+                <div class="mood-option" data-value="2">
+                    😕 <span>Sedih</span>
+                </div>
+                <div class="mood-option" data-value="3">
+                    😐 <span>Netral</span>
+                </div>
+                <div class="mood-option" data-value="4">
+                    🙂 <span>Senang</span>
+                </div>
+                <div class="mood-option" data-value="5">
+                    😁 <span>Sangat Senang</span>
+                </div>
+            </div>
+              <textarea id="mood-note" class="mood-note" placeholder="Ceritakan alasan dari suasana hatimu hari ini... (opsional)" rows="3"></textarea>
+            
+            <input type="hidden" id="selected-mood" value="3">
+            <button class="mood-submit">Simpan</button>
+            <br>
+            <button class="mood-later">Isi Nanti</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="chatbot-sidebar" id="chatbot-sidebar">
+        <div class="sidebar-header">
+            <div class="chat-header">
+                <div class="hero-image">
+                    <div class="orbital"></div>
+                    <div class="orbital"></div>
+                    <div class="orbital"></div>
+                    <img src="{{ url_for('static', filename='brain.png') }}" class="brain-img" style="position: relative; z-index: 2;">
+                </div>
+                <h2 class="header-title">AIDiary</h2>
+              </div>              
+          <button id="new-chat">+ Chat Baru</button>
+        </div>
+      
+        <ul class="chat-list" id="chat-list">
+            {% for chat in chats %}
+              <li class="chat-item {% if chat.id == selected_chat.id %}active{% endif %}">
+                <a href="{{ url_for('open_chat', chat_id=chat.id) }}">{{ chat.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>          
+        <div class="sidebar-footer">
+          <button class="sidebar-btn" id="mood-tracker-btn"><i class="fas fa-chart-line"></i> Mood Tracker</button>
+          <button class="sidebar-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+        </div>
+    </div>
+      
+    <main class="chat-main">
+        <div class="chat-container">
+          <h5 class="chat-title">Halo, {{ session['username'] }}</h5>          <p>Bagaimana perasaanmu hari ini?</p>
+          <div class="emoji-buttons-inside">
+            <button aria-label="Sedih" data-emoji="😢">😢</button>
+            <button aria-label="Keren" data-emoji="😎">😎</button>
+            <button aria-label="Senang" data-emoji="☺️">☺️</button>
+            <button aria-label="Sangat senang" data-emoji="😁">😁</button>
+            <button aria-label="Bosan" data-emoji="🙄">🙄</button>
+            <button aria-label="Marah" data-emoji="😡">😡</button>
+          </div>
+          <div id="chatbox" class="chat-box"></div>
+          <div id="user-input" class="chat-input-group">
+            <input
+              type="text"
+              id="message"
+              placeholder="Ketik pesan kamu..."
+              aria-label="Ketik pesan"
+            />            <button>Kirim</button>
+          </div>
+        </div>
+      </main>
+        <script>
+        // Pass the server-side variable to JavaScript
+        // Jinja2 template akan merender ini sebagai true/false sesuai kondisi
+        window.showMoodPrompt = {{ 'true' if show_mood_prompt else 'false' }};
+        
+        // Error handling for script loading
+        window.addEventListener('error', function(e) {
+            if (e.filename && (e.filename.includes('script.js') || e.filename.includes('mood_prompt.js'))) {
+                console.error('Error loading script:', e.message);
+                alert('Terjadi kesalahan saat memuat aplikasi. Silakan refresh halaman.');
+            }
+        });    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='mood_prompt.js') }}"></script>
+    <script src="{{ url_for('static', filename='chat_loader.js') }}"></script>
+    <script>
+        // Ensure all scripts have loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AIDiary app initialized');
+            // Optional: Check for message and chatbox elements
+            if (!document.getElementById('message') || !document.getElementById('chatbox')) {
+                console.warn('Some chat elements are missing');
+            }
+        });
+    </script>
+      <!-- Pass selected chat data to frontend -->
+    {% if selected_chat %}
+    <script id="selected-chat-data" type="application/json">
+        {{ selected_chat | tojson }}
+    </script>
+    {% endif %}
+</body>
+</html>
